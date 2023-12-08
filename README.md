@@ -1,0 +1,7 @@
+# Project-for-BME4301-SJTU
+Course Project for BME4301 in SJTU
+
+Run command to start
+```bash
+  python3 run.py
+```
