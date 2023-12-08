@@ -5,3 +5,4 @@ Run command to start
 ```bash
   python3 run.py
 ```
+You can edit `Ui/MainWindow.ui` to practise deception。
