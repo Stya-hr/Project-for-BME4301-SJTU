@@ -1,7 +1,5 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from PyQt5.QtCore import Qt
-import pyqtgraph as pg
 import cv2
 import skimage
 from skimage import io, filters, morphology
@@ -13,8 +11,16 @@ from module import Project1, Project6
 
 
 class MyMainWindow(QMainWindow):
+    """
+    This class represents the main window of the application.
+    It inherits from QMainWindow and contains methods for setting up different projects.
+    """
 
     def __init__(self, parent=None):
+        """
+        Constructor for MyMainWindow class.
+        Initializes the UI and sets up the projects.
+        """
         super().__init__(parent)
         self.ui = loadUi('Ui/MainWindow.ui', self)
         self.setupProject1()
@@ -25,6 +31,10 @@ class MyMainWindow(QMainWindow):
         self.setupProject6()
 
     def setupProject1(self):
+        """
+        Sets up Project 1.
+        Connects the UI elements to their respective functions.
+        """
         self.ui.RawImageView_1.getHistogramWidget().setVisible(False)
         self.ui.RawImageView_1.ui.menuBtn.setVisible(False)
         self.ui.RawImageView_1.ui.roiBtn.setVisible(False)
@@ -42,6 +52,10 @@ class MyMainWindow(QMainWindow):
         self.ui.ThresholdSpin.valueChanged.connect(self.binary_thresh)
 
     def setupProject2(self):
+        """
+        Sets up Project 2.
+        Connects the UI elements to their respective functions.
+        """
         self.ui.RawImageView_2.getHistogramWidget().setVisible(False)
         self.ui.RawImageView_2.ui.menuBtn.setVisible(False)
         self.ui.RawImageView_2.ui.roiBtn.setVisible(False)
@@ -66,6 +80,10 @@ class MyMainWindow(QMainWindow):
         self.ui.MedianButton.clicked.connect(self.run_median)
 
     def setupProject3(self):
+        """
+        Sets up Project 3.
+        Connects the UI elements to their respective functions.
+        """
         self.ui.RawImageView_3.getHistogramWidget().setVisible(False)
         self.ui.RawImageView_3.ui.menuBtn.setVisible(False)
         self.ui.RawImageView_3.ui.roiBtn.setVisible(False)
@@ -86,6 +104,10 @@ class MyMainWindow(QMainWindow):
         self.ui.BinaryClosingButton.clicked.connect(self.binary_closing)
 
     def setupProject4(self):
+        """
+        Sets up Project 4.
+        Connects the UI elements to their respective functions.
+        """
         self.ui.RawImageView_4.getHistogramWidget().setVisible(False)
         self.ui.RawImageView_4.ui.menuBtn.setVisible(False)
         self.ui.RawImageView_4.ui.roiBtn.setVisible(False)
@@ -107,6 +129,10 @@ class MyMainWindow(QMainWindow):
             self.skeleton_restore)
 
     def setupProject5(self):
+        """
+        Sets up Project 5.
+        Connects the UI elements to their respective functions.
+        """
         self.ui.RawImageView_5.getHistogramWidget().setVisible(False)
         self.ui.RawImageView_5.ui.menuBtn.setVisible(False)
         self.ui.RawImageView_5.ui.roiBtn.setVisible(False)
@@ -124,6 +150,10 @@ class MyMainWindow(QMainWindow):
         self.ui.GrayClosingButton.clicked.connect(self.gray_closing)
 
     def setupProject6(self):
+        """
+        Sets up Project 6.
+        Connects the UI elements to their respective functions.
+        """
         self.ui.RawImageView_6.getHistogramWidget().setVisible(False)
         self.ui.RawImageView_6.ui.menuBtn.setVisible(False)
         self.ui.RawImageView_6.ui.roiBtn.setVisible(False)
@@ -144,6 +174,9 @@ class MyMainWindow(QMainWindow):
 
     # Project1
     def openImage_1(self):
+        """
+        Opens an image for Project 1.
+        """
         # Get image name
         img_name, _ = QFileDialog.getOpenFileName(
             self, "打开", os.getcwd(),
@@ -159,12 +192,13 @@ class MyMainWindow(QMainWindow):
             self.ui.BinaryImageView_1.clear()
             # Display raw image
             axis = (1, 0, 2) if self.raw_img1.ndim == 3 else (1, 0)
-            self.ui.RawImageView_1.setImage(np.transpose(self.raw_img1, axis))
+            self.ui.RawImageView_1.setImage(
+                np.transpose(self.raw_img1, axis).astype(np.uint8))
             # Display grayscale image
             self.gray_img1 = self.raw_img1 if self.raw_img1.ndim == 2 else cv2.cvtColor(
                 self.raw_img1, cv2.COLOR_RGB2GRAY)
             self.ui.GrayImageView_1.setImage(
-                np.transpose(self.gray_img1, (1, 0)))
+                np.transpose(self.gray_img1, (1, 0)).astype(np.uint8))
             # Enable binary thresholding operation
             self.ui.ThresholdSpin.setEnabled(True)
             self.ui.ThresholdSpin.setValue(0)
@@ -181,30 +215,42 @@ class MyMainWindow(QMainWindow):
                                                      brush=(0, 0, 255, 150))
 
     def binary_otsu(self):
+        """
+        Performs Otsu's thresholding on the grayscale image of Project 1.
+        """
         thr = Project1.thresholdOTSU(self.gray_img1)
         thr = int(thr)
         self.ui.ThresholdSlider.setValue(thr)
         self.ui.ThresholdSpin.setValue(thr)
 
     def binary_entropy(self):
+        """
+        Performs maximum entropy thresholding on the grayscale image of Project 1.
+        """
         thr = Project1.thresholdMaxEntropy(self.gray_img1)
         thr = int(thr)
         self.ui.ThresholdSlider.setValue(thr)
         self.ui.ThresholdSpin.setValue(thr)
 
     def binary_thresh(self, threshold):
+        """
+        Applies binary thresholding on the grayscale image of Project 1 using the given threshold.
+        """
         try:
             self.ui.HistogramView.getPlotItem().removeItem(self.threshLine)
         except:
             pass
         binary_image = self.gray_img1 >= threshold
-        self.ui.BinaryImageView_1.setImage(np.transpose(binary_image, (1, 0)),
+        self.ui.BinaryImageView_1.setImage(np.transpose(binary_image, (1, 0)).astype(np.uint8),
                                            levels=[0, 1])
         self.threshLine = self.ui.HistogramView.getPlotItem().addLine(
             x=threshold)
 
     # Project2
     def openImage_2(self):
+        """
+        Opens an image for Project 2.
+        """
         # Get image name
         img_name, _ = QFileDialog.getOpenFileName(
             self, "打开", os.getcwd(),
@@ -221,42 +267,49 @@ class MyMainWindow(QMainWindow):
             self.ui.DenoisedImageView.clear()
             # Display raw image
             axis = (1, 0, 2) if self.raw_img2.ndim == 3 else (1, 0)
-            self.ui.RawImageView_2.setImage(np.transpose(self.raw_img2, axis))
+            self.ui.RawImageView_2.setImage(
+                np.transpose(self.raw_img2, axis).astype(np.uint8))
             # Display grayscale image
             self.gray_img2 = self.raw_img2 if self.raw_img2.ndim == 2 else cv2.cvtColor(
                 self.raw_img2, cv2.COLOR_RGB2GRAY)
             self.ui.GrayImageView_2.setImage(
-                np.transpose(self.gray_img2, (1, 0)))
+                np.transpose(self.gray_img2, (1, 0)).astype(np.uint8))
 
     def run_roberts_x(self):
         output_img = filters.roberts_pos_diag(self.gray_img2)
         self.ui.EdgeImageView.clear()
-        self.ui.EdgeImageView.setImage(np.transpose(output_img, (1, 0)))
+        self.ui.EdgeImageView.setImage(
+            np.transpose(output_img, (1, 0)))
 
     def run_roberts_y(self):
         output_img = filters.roberts_neg_diag(self.gray_img2)
         self.ui.EdgeImageView.clear()
-        self.ui.EdgeImageView.setImage(np.transpose(output_img, (1, 0)))
+        self.ui.EdgeImageView.setImage(
+            np.transpose(output_img, (1, 0)))
 
     def run_prewitt_x(self):
         output_img = filters.prewitt_v(self.gray_img2)
         self.ui.EdgeImageView.clear()
-        self.ui.EdgeImageView.setImage(np.transpose(output_img, (1, 0)))
+        self.ui.EdgeImageView.setImage(
+            np.transpose(output_img, (1, 0)))
 
     def run_prewitt_y(self):
         output_img = filters.prewitt_h(self.gray_img2)
         self.ui.EdgeImageView.clear()
-        self.ui.EdgeImageView.setImage(np.transpose(output_img, (1, 0)))
+        self.ui.EdgeImageView.setImage(
+            np.transpose(output_img, (1, 0)))
 
     def run_sobel_x(self):
         output_img = filters.sobel_v(self.gray_img2)
         self.ui.EdgeImageView.clear()
-        self.ui.EdgeImageView.setImage(np.transpose(output_img, (1, 0)))
+        self.ui.EdgeImageView.setImage(
+            np.transpose(output_img, (1, 0)))
 
     def run_sobel_y(self):
         output_img = filters.sobel_h(self.gray_img2)
         self.ui.EdgeImageView.clear()
-        self.ui.EdgeImageView.setImage(np.transpose(output_img, (1, 0)))
+        self.ui.EdgeImageView.setImage(
+            np.transpose(output_img, (1, 0)))
 
     def run_Gaussian(self):
         kernel_size = self.ui.KernelSpin_2.value()
@@ -264,14 +317,16 @@ class MyMainWindow(QMainWindow):
         output_img = cv2.GaussianBlur(self.gray_img2,
                                       (kernel_size, kernel_size), sigma)
         self.ui.DenoisedImageView.clear()
-        self.ui.DenoisedImageView.setImage(np.transpose(output_img, (1, 0)))
+        self.ui.DenoisedImageView.setImage(
+            np.transpose(output_img, (1, 0)).astype(np.uint8))
 
     def run_median(self):
         kernel_size = self.ui.KernelSpin_2.value()
         kernel = morphology.disk(kernel_size)
         output_img = filters.median(self.gray_img2, kernel)
         self.ui.DenoisedImageView.clear()
-        self.ui.DenoisedImageView.setImage(np.transpose(output_img, (1, 0)))
+        self.ui.DenoisedImageView.setImage(
+            np.transpose(output_img, (1, 0)).astype(np.uint8))
 
     # Project3
     def openImage_3(self):
@@ -291,17 +346,18 @@ class MyMainWindow(QMainWindow):
             self.ui.MorphImageView_3.clear()
             # Display raw image
             axis = (1, 0, 2) if self.raw_img3.ndim == 3 else (1, 0)
-            self.ui.RawImageView_3.setImage(np.transpose(self.raw_img3, axis))
+            self.ui.RawImageView_3.setImage(
+                np.transpose(self.raw_img3, axis).astype(np.uint8))
             # Display grayscale image
             self.gray_img3 = self.raw_img3 if self.raw_img3.ndim == 2 else cv2.cvtColor(
                 self.raw_img3, cv2.COLOR_RGB2GRAY)
             self.ui.GrayImageView_3.setImage(
-                np.transpose(self.gray_img3, (1, 0)))
+                np.transpose(self.gray_img3, (1, 0)).astype(np.uint8))
             # Display binary image (using OTSU)
             thr = Project1.thresholdOTSU(self.gray_img3)
             self.binary_img3 = self.gray_img3 >= thr
             self.ui.BinaryImageView_3.setImage(np.transpose(
-                self.binary_img3, (1, 0)),
+                self.binary_img3, (1, 0)).astype(np.uint8),
                 levels=[0, 1])
 
     def binary_dilation(self):
@@ -310,7 +366,8 @@ class MyMainWindow(QMainWindow):
         kernel = morphology.disk(kernel_size)
         output_img = morphology.dilation(self.binary_img3, kernel)
         self.ui.MorphImageView_3.clear()
-        self.ui.MorphImageView_3.setImage(np.transpose(output_img, (1, 0)))
+        self.ui.MorphImageView_3.setImage(
+            np.transpose(output_img, (1, 0)).astype(np.uint8))
 
     def binary_erosion(self):
         kernel_size = self.ui.KernelSpin_3.value()
@@ -318,7 +375,8 @@ class MyMainWindow(QMainWindow):
         kernel = morphology.disk(kernel_size)
         output_img = morphology.erosion(self.binary_img3, kernel)
         self.ui.MorphImageView_3.clear()
-        self.ui.MorphImageView_3.setImage(np.transpose(output_img, (1, 0)))
+        self.ui.MorphImageView_3.setImage(
+            np.transpose(output_img, (1, 0)).astype(np.uint8))
 
     def binary_opening(self):
         kernel_size = self.ui.KernelSpin_3.value()
@@ -326,7 +384,8 @@ class MyMainWindow(QMainWindow):
         kernel = morphology.disk(kernel_size)
         output_img = morphology.opening(self.binary_img3, kernel)
         self.ui.MorphImageView_3.clear()
-        self.ui.MorphImageView_3.setImage(np.transpose(output_img, (1, 0)))
+        self.ui.MorphImageView_3.setImage(
+            np.transpose(output_img, (1, 0)).astype(np.uint8))
 
     def binary_closing(self):
         kernel_size = self.ui.KernelSpin_3.value()
@@ -334,7 +393,8 @@ class MyMainWindow(QMainWindow):
         kernel = morphology.disk(kernel_size)
         output_img = morphology.closing(self.binary_img3, kernel)
         self.ui.MorphImageView_3.clear()
-        self.ui.MorphImageView_3.setImage(np.transpose(output_img, (1, 0)))
+        self.ui.MorphImageView_3.setImage(
+            np.transpose(output_img, (1, 0)).astype(np.uint8))
 
     # Project4
     def openImage_4(self):
@@ -354,17 +414,18 @@ class MyMainWindow(QMainWindow):
             self.ui.MorphImageView_4.clear()
             # Display raw image
             axis = (1, 0, 2) if self.raw_img4.ndim == 3 else (1, 0)
-            self.ui.RawImageView_4.setImage(np.transpose(self.raw_img4, axis))
+            self.ui.RawImageView_4.setImage(
+                np.transpose(self.raw_img4, axis).astype(np.uint8))
             # Display grayscale image
             self.gray_img4 = self.raw_img4 if self.raw_img4.ndim == 2 else cv2.cvtColor(
                 self.raw_img4, cv2.COLOR_RGB2GRAY)
             self.ui.GrayImageView_4.setImage(
-                np.transpose(self.gray_img4, (1, 0)))
+                np.transpose(self.gray_img4, (1, 0)).astype(np.uint8))
             # Display binary image (using OTSU)
             thr = Project1.thresholdOTSU(self.gray_img4)
             self.binary_img4 = self.gray_img4 >= thr
             self.ui.BinaryImageView_4.setImage(np.transpose(
-                self.binary_img4, (1, 0)),
+                self.binary_img4, (1, 0)).astype(np.uint8),
                 levels=[0, 1])
 
     def distance_transform(self):
@@ -377,7 +438,8 @@ class MyMainWindow(QMainWindow):
             output_img = ndimage.distance_transform_cdt(self.binary_img4,
                                                         metric='chessboard')
         self.ui.MorphImageView_4.clear()
-        self.ui.MorphImageView_4.setImage(np.transpose(output_img, (1, 0)))
+        self.ui.MorphImageView_4.setImage(
+            np.transpose(output_img, (1, 0)).astype(np.uint8))
 
     def skeletonize(self):
         output_img, dist = morphology.medial_axis(self.binary_img4,
@@ -385,14 +447,16 @@ class MyMainWindow(QMainWindow):
         self.skeleton = output_img
         self.dist = dist
         self.ui.MorphImageView_4.clear()
-        self.ui.MorphImageView_4.setImage(np.transpose(output_img, (1, 0)))
+        self.ui.MorphImageView_4.setImage(
+            np.transpose(output_img, (1, 0)).astype(np.uint8))
 
     def skeleton_restore(self):
         assert self.skeleton is not None
         assert self.dist is not None
         output_img = morphology.reconstruction(self.skeleton, self.dist)
         self.ui.MorphImageView_4.clear()
-        self.ui.MorphImageView_4.setImage(np.transpose(output_img, (1, 0)))
+        self.ui.MorphImageView_4.setImage(
+            np.transpose(output_img, (1, 0)).astype(np.uint8))
 
     # Project5
     def openImage_5(self):
@@ -411,12 +475,13 @@ class MyMainWindow(QMainWindow):
             self.ui.MorphImageView_5.clear()
             # Display raw image
             axis = (1, 0, 2) if self.raw_img5.ndim == 3 else (1, 0)
-            self.ui.RawImageView_5.setImage(np.transpose(self.raw_img5, axis))
+            self.ui.RawImageView_5.setImage(
+                np.transpose(self.raw_img5, axis).astype(np.uint8))
             # Display grayscale image
             self.gray_img5 = self.raw_img5 if self.raw_img5.ndim == 2 else cv2.cvtColor(
                 self.raw_img5, cv2.COLOR_RGB2GRAY)
             self.ui.GrayImageView_5.setImage(
-                np.transpose(self.gray_img5, (1, 0)))
+                np.transpose(self.gray_img5, (1, 0)).astype(np.uint8))
 
     def gray_dilation(self):
         kernel_size = self.ui.KernelSpin_5.value()
@@ -424,7 +489,8 @@ class MyMainWindow(QMainWindow):
         kernel = morphology.disk(kernel_size)
         output_img = morphology.dilation(self.gray_img5, kernel)
         self.ui.MorphImageView_5.clear()
-        self.ui.MorphImageView_5.setImage(np.transpose(output_img, (1, 0)))
+        self.ui.MorphImageView_5.setImage(
+            np.transpose(output_img, (1, 0)).astype(np.uint8))
 
     def gray_erosion(self):
         kernel_size = self.ui.KernelSpin_5.value()
@@ -432,7 +498,8 @@ class MyMainWindow(QMainWindow):
         kernel = morphology.disk(kernel_size)
         output_img = morphology.erosion(self.gray_img5, kernel)
         self.ui.MorphImageView_5.clear()
-        self.ui.MorphImageView_5.setImage(np.transpose(output_img, (1, 0)))
+        self.ui.MorphImageView_5.setImage(
+            np.transpose(output_img, (1, 0)).astype(np.uint8))
 
     def gray_opening(self):
         kernel_size = self.ui.KernelSpin_5.value()
@@ -440,7 +507,8 @@ class MyMainWindow(QMainWindow):
         kernel = morphology.disk(kernel_size)
         output_img = morphology.opening(self.gray_img5, kernel)
         self.ui.MorphImageView_5.clear()
-        self.ui.MorphImageView_5.setImage(np.transpose(output_img, (1, 0)))
+        self.ui.MorphImageView_5.setImage(
+            np.transpose(output_img, (1, 0)).astype(np.uint8))
 
     def gray_closing(self):
         kernel_size = self.ui.KernelSpin_5.value()
@@ -448,7 +516,8 @@ class MyMainWindow(QMainWindow):
         kernel = morphology.disk(kernel_size)
         output_img = morphology.closing(self.gray_img5, kernel)
         self.ui.MorphImageView_5.clear()
-        self.ui.MorphImageView_5.setImage(np.transpose(output_img, (1, 0)))
+        self.ui.MorphImageView_5.setImage(
+            np.transpose(output_img, (1, 0)).astype(np.uint8))
 
     # Project6
     def openImage_6(self):
@@ -468,17 +537,18 @@ class MyMainWindow(QMainWindow):
             self.ui.MorphImageView_6.clear()
             # Display raw image
             axis = (1, 0, 2) if self.raw_img6.ndim == 3 else (1, 0)
-            self.ui.RawImageView_6.setImage(np.transpose(self.raw_img6, axis))
+            self.ui.RawImageView_6.setImage(
+                np.transpose(self.raw_img6, axis).astype(np.uint8))
             # Display grayscale image
             self.gray_img6 = self.raw_img6 if self.raw_img6.ndim == 2 else cv2.cvtColor(
                 self.raw_img6, cv2.COLOR_RGB2GRAY)
             self.ui.GrayImageView_6.setImage(
-                np.transpose(self.gray_img6, (1, 0)))
+                np.transpose(self.gray_img6, (1, 0)).astype(np.uint8))
             # Display binary image (using OTSU)
             thr = Project1.thresholdOTSU(self.gray_img6)
             self.binary_img6 = self.gray_img6 >= thr
             self.ui.BinaryImageView_6.setImage(np.transpose(
-                self.binary_img6, (1, 0)),
+                self.binary_img6, (1, 0)).astype(np.uint8),
                 levels=[0, 1])
 
     def morph_edge_detect(self):
@@ -492,7 +562,8 @@ class MyMainWindow(QMainWindow):
             output_img = skimage.img_as_ubyte(self.binary_img6) - \
                 skimage.img_as_ubyte(morphology.erosion(self.binary_img6))
         self.ui.MorphImageView_6.clear()
-        self.ui.MorphImageView_6.setImage(np.transpose(output_img, (1, 0)))
+        self.ui.MorphImageView_6.setImage(
+            np.transpose(output_img, (1, 0)).astype(np.uint8))
 
     def morph_gradient(self):
         if self.ui.StandardButton.isChecked():
@@ -505,7 +576,8 @@ class MyMainWindow(QMainWindow):
             output_img = (self.gray_img6 -
                           morphology.erosion(self.gray_img6)) / 2
         self.ui.MorphImageView_6.clear()
-        self.ui.MorphImageView_6.setImage(np.transpose(output_img, (1, 0)))
+        self.ui.MorphImageView_6.setImage(
+            np.transpose(output_img, (1, 0)).astype(np.uint8))
 
     def morph_reconst(self):
         if self.ui.ConditionalDilationButton.isChecked():
@@ -515,4 +587,5 @@ class MyMainWindow(QMainWindow):
         elif self.ui.CBRButton.isChecked():
             output_img = Project6.CBR_func(self.gray_img6)
         self.ui.MorphImageView_6.clear()
-        self.ui.MorphImageView_6.setImage(np.transpose(output_img, (1, 0)))
+        self.ui.MorphImageView_6.setImage(
+            np.transpose(output_img, (1, 0)).astype(np.uint8))
