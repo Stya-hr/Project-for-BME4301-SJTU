@@ -10,3 +10,5 @@ Run command to start
 ```
 
 You can edit `Ui/MainWindow.ui` to practise deception.
+
+> Edit time 2023.12.09
